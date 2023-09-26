@@ -3,6 +3,7 @@ package no.simpleapi.checkout;
 import com.google.gson.Gson;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class CheckoutCalculator {
 
@@ -12,6 +13,14 @@ public class CheckoutCalculator {
     public CheckoutCalculator(IProductStore store, String input) {
         this.store=store;
         this.products = toList(input);
+    }
+
+    public boolean onlyKnownProducts(){
+        List<String> unknownProducts = products
+                .stream()
+                .filter(c -> store.getProductDetails(c)==null)
+                .collect(Collectors.toList());
+        return unknownProducts.size()==0;
     }
 
     private List<String> toList(String input) {

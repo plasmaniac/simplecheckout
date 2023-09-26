@@ -2,6 +2,7 @@ package no.simpleapi.checkout;
 
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CheckoutCalculatorTest {
@@ -33,6 +34,22 @@ public class CheckoutCalculatorTest {
         calc= new CheckoutCalculator(new InMemoryProductStore(), testList);
         calculated = calc.calculatePrice();
         assertTrue(calculated ==1480);
+
+        testList = "[]";
+        calc= new CheckoutCalculator(new InMemoryProductStore(), testList);
+        calculated = calc.calculatePrice();
+        assertTrue(calculated ==0);
+    }
+
+    @Test
+    public void testShoppingCartWithUnknownProducts(){
+        String testList = "[\"0001\",\"0001\",\"0001\"]";
+        CheckoutCalculator calc= new CheckoutCalculator(new InMemoryProductStore(), testList);
+        assertTrue(calc.onlyKnownProducts());
+
+        testList = "[\"0001\",\"0001\",\"3333\"]";
+        calc= new CheckoutCalculator(new InMemoryProductStore(), testList);
+        assertFalse(calc.onlyKnownProducts());
 
     }
 

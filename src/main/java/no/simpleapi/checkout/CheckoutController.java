@@ -14,7 +14,10 @@ public class CheckoutController {
     @PostMapping
     @RequestMapping("/checkout")
     public CheckoutResponse checkout(@RequestBody String input) {
-        float price = new CheckoutCalculator(new InMemoryProductStore(), input).calculatePrice();
+        CheckoutCalculator checkoutCalculator = new CheckoutCalculator(new InMemoryProductStore(), input);
+        if(!checkoutCalculator.onlyKnownProducts())
+            return new CheckoutResponse(0, "Invalid shopping cart"); //error, lets
+        float price = checkoutCalculator.calculatePrice();
         CheckoutResponse checkoutResponse = new CheckoutResponse(price);
         return checkoutResponse;
     }
@@ -22,11 +25,22 @@ public class CheckoutController {
     public static class CheckoutResponse {
         double price;
 
+        String error; //non-null when error
+
+        public String getError() {
+            return error;
+        }
+
         public double getPrice() {
             return price;
         }
         public CheckoutResponse(double price) {
             this.price = price;
+        }
+
+        public CheckoutResponse(double price, String error) {
+            this.price = price;
+            this.error = error;
         }
     }
 }
