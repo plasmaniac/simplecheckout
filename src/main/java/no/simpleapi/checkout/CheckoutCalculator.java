@@ -2,16 +2,15 @@ package no.simpleapi.checkout;
 
 import com.google.gson.Gson;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class CheckoutCalculator {
 
     private List<String> products;
+    IProductStore store;
 
-    public CheckoutCalculator(String input) {
+    public CheckoutCalculator(IProductStore store, String input) {
+        this.store=store;
         this.products = toList(input);
     }
 
@@ -24,6 +23,36 @@ public class CheckoutCalculator {
 
     public List<String> getProducts() {
         return products;
+    }
+
+    public float calculatePrice(){
+        float price = 0;
+        Map<String, Integer> shoppingCart = new HashMap<>();
+        for(String key: products){
+            if(shoppingCart.get(key)==null)
+                shoppingCart.put(key, 1);
+            else
+                shoppingCart.put(key, shoppingCart.get(key)+1);
+        }
+        Set<String> keys = shoppingCart.keySet();
+        for (String key : keys){
+            price += calcProductPrice(key, shoppingCart.get(key));
+        }
+        return price;
+    }
+
+    private float calcProductPrice(String key, Integer count) {
+        float price = 0;
+        ProductDefinition productDetails = store.getProductDetails(key);
+        Discount discount = productDetails.rule;
+        if(discount !=null){ // this product has a discount
+            int rounds = count / discount.threshold; // how many rounds of discount
+            price += rounds * discount.price;
+            price += (count % discount.threshold) * productDetails.price;// then the ones not eligible for discount
+        } else {
+            price += count * productDetails.price; // simple case: number of items * itemprice
+        }
+        return price;
     }
 
 }

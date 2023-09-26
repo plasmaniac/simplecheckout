@@ -14,7 +14,7 @@ public class CheckoutController {
     @PostMapping
     @RequestMapping("/checkout")
     public CheckoutResponse checkout(@RequestBody String input) {
-        float price = 0;
+        float price = new CheckoutCalculator(new InMemoryProductStore(), input).calculatePrice();
         CheckoutResponse checkoutResponse = new CheckoutResponse(price);
         return checkoutResponse;
     }
